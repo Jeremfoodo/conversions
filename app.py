@@ -18,6 +18,10 @@ def main():
         type=["pdf"]
     )
 
+    # Vérifier l'état de la confirmation
+    if 'confirm_conversion' not in st.session_state:
+        st.session_state.confirm_conversion = None
+
     # Bouton de conversion
     if st.button("Convertir"):
         if uploaded_file and supplier != "Select":
@@ -31,27 +35,28 @@ def main():
             st.write(
                 f"Vous allez convertir la mercuriale pour le fournisseur {supplier}. Attention, cela coûte de l'argent à chaque fois. Êtes-vous certain de ce fichier ?"
             )
-
+            
+            # Créer les boutons de confirmation
             col1, col2 = st.columns(2)
             with col1:
                 if st.button("Annuler"):
+                    st.session_state.confirm_conversion = False
                     st.write("Conversion annulée.")
-                    return
             
             with col2:
                 if st.button("OUI"):
+                    st.session_state.confirm_conversion = True
                     st.spinner("Conversion en cours...")
                     
-                    # Conversion du PDF en Excel
-                    temp_excel_path = convert_pdf_to_excel(temp_pdf_path)
+                    # Appeler la fonction de conversion spécifique au fournisseur
+                    if supplier == "Yes Food":
+                        temp_excel_path = convert_pdf_to_excel(temp_pdf_path, "yes_food")
+                        final_file_path = process_yes_food(temp_excel_path)
+                    elif supplier == "MTC":
+                        temp_excel_path = convert_pdf_to_excel(temp_pdf_path, "mtc")
+                        final_file_path = process_mtc(temp_excel_path)
                     
-                    if temp_excel_path:
-                        # Traitement spécifique au fournisseur
-                        if supplier == "Yes Food":
-                            final_file_path = process_yes_food(temp_excel_path)
-                        elif supplier == "MTC":
-                            final_file_path = process_mtc(temp_excel_path)
-                        
+                    if final_file_path:
                         # Télécharger le fichier Excel final
                         with open(final_file_path, "rb") as f:
                             st.download_button(
@@ -71,8 +76,8 @@ def main():
                         os.remove(temp_excel_path)
                     if os.path.exists(final_file_path):
                         os.remove(final_file_path)
-                else:
-                    st.write("Conversion annulée.")
+                elif st.session_state.confirm_conversion is not None:
+                    st.write("Veuillez choisir 'OUI' ou 'Annuler' pour continuer.")
         else:
             st.warning("Veuillez choisir un fournisseur et uploader un fichier PDF.")
 
