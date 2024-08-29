@@ -1,6 +1,8 @@
 import pdftables_api
 import tempfile
+import os
 
+# Fonction pour convertir le PDF en Excel avec pdftables_api
 def convert_pdf_to_excel(pdf_path):
     api_key = 'o6xspb5x8fq4'  # Remplacez par votre clé API
     # Crée un fichier temporaire pour stocker le fichier Excel converti
@@ -9,7 +11,7 @@ def convert_pdf_to_excel(pdf_path):
     
     # Initialiser le client API avec la clé API
     client = pdftables_api.Client(api_key)
-
+    
     try:
         # Convertir le PDF en Excel avec un seul onglet
         client.xlsx(pdf_path, temp_excel_path)
