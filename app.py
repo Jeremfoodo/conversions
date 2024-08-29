@@ -32,7 +32,7 @@ def main():
                     temp_pdf_path = temp_pdf.name
                 
                 # Appel à la fonction de conversion et obtenir le fichier Excel
-                file_path = convert_pdf_to_excel(temp_pdf_path, supplier)
+                file_path = convert_pdf_to_excel(temp_pdf_path)
                 
                 if file_path:
                     # Appel à la fonction de traitement spécifique au fournisseur
