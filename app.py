@@ -14,13 +14,9 @@ def main():
 
     # Upload du fichier PDF
     uploaded_file = st.file_uploader(
-        "Chargez la mercuriale que vous voulez convertir en PDF. Faites bien attention que son format est le même que celui de la dernière fois, en cas de changement, alertez votre category manager.",
+        "Chargez la mercuriale que vous voulez convertir en PDF. Faites bien attention que son format est le même que celui de la dernière fois, en cas de changement, alertez votre category manager. ATTENTION, cette opération a un coût, ne la faites que si vous en avez besoin",
         type=["pdf"]
     )
-
-    # Vérifier l'état de la confirmation
-    if 'confirm_conversion' not in st.session_state:
-        st.session_state.confirm_conversion = None
 
     # Bouton de conversion
     if st.button("Convertir"):
@@ -31,53 +27,35 @@ def main():
                 temp_pdf.write(uploaded_file.read())
                 temp_pdf.close()
             
-            # Message de confirmation
-            st.write(
-                f"Vous allez convertir la mercuriale pour le fournisseur {supplier}. Attention, cela coûte de l'argent à chaque fois. Êtes-vous certain de ce fichier ?"
-            )
+            # Conversion du PDF en Excel
+            temp_excel_path = convert_pdf_to_excel(temp_pdf_path)
             
-            # Créer les boutons de confirmation
-            col1, col2 = st.columns(2)
-            with col1:
-                if st.button("Annuler"):
-                    st.session_state.confirm_conversion = False
-                    st.write("Conversion annulée.")
+            if temp_excel_path:
+                # Traitement spécifique au fournisseur
+                if supplier == "Yes Food":
+                    final_file_path = process_yes_food(temp_excel_path)
+                elif supplier == "MTC":
+                    final_file_path = process_mtc(temp_excel_path)
+                
+                # Télécharger le fichier Excel final
+                with open(final_file_path, "rb") as f:
+                    st.download_button(
+                        label="Télécharger le fichier Excel",
+                        data=f,
+                        file_name=os.path.basename(final_file_path),
+                        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                    )
+                
+                st.success("Conversion terminée ! Vous pouvez télécharger le fichier Excel.")
+            else:
+                st.error("Erreur lors de la conversion du fichier PDF.")
             
-            with col2:
-                if st.button("OUI"):
-                    st.session_state.confirm_conversion = True
-                    st.spinner("Conversion en cours...")
-                    
-                    # Appeler la fonction de conversion spécifique au fournisseur
-                    if supplier == "Yes Food":
-                        temp_excel_path = convert_pdf_to_excel(temp_pdf_path, "yes_food")
-                        final_file_path = process_yes_food(temp_excel_path)
-                    elif supplier == "MTC":
-                        temp_excel_path = convert_pdf_to_excel(temp_pdf_path, "mtc")
-                        final_file_path = process_mtc(temp_excel_path)
-                    
-                    if final_file_path:
-                        # Télécharger le fichier Excel final
-                        with open(final_file_path, "rb") as f:
-                            st.download_button(
-                                label="Télécharger le fichier Excel",
-                                data=f,
-                                file_name=os.path.basename(final_file_path),
-                                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                            )
-                        
-                        st.success("Conversion terminée ! Vous pouvez télécharger le fichier Excel.")
-                    else:
-                        st.error("Erreur lors de la conversion du fichier PDF.")
-                    
-                    # Nettoyer les fichiers temporaires
-                    os.remove(temp_pdf_path)
-                    if os.path.exists(temp_excel_path):
-                        os.remove(temp_excel_path)
-                    if os.path.exists(final_file_path):
-                        os.remove(final_file_path)
-                elif st.session_state.confirm_conversion is not None:
-                    st.write("Veuillez choisir 'OUI' ou 'Annuler' pour continuer.")
+            # Nettoyer les fichiers temporaires
+            os.remove(temp_pdf_path)
+            if os.path.exists(temp_excel_path):
+                os.remove(temp_excel_path)
+            if os.path.exists(final_file_path):
+                os.remove(final_file_path)
         else:
             st.warning("Veuillez choisir un fournisseur et uploader un fichier PDF.")
 
