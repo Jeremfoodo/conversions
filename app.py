@@ -2,6 +2,8 @@ import streamlit as st
 import tempfile
 import os
 from utils import convert_pdf_to_excel
+from converters.yes_food_converter import process_yes_food
+from converters.mtc_converter import process_mtc
 
 # Fonction principale de l'application
 def main():
@@ -29,12 +31,18 @@ def main():
             temp_excel_path = convert_pdf_to_excel(temp_pdf_path)
             
             if temp_excel_path:
-                # Téléchargement du fichier Excel
-                with open(temp_excel_path, "rb") as f:
+                # Traitement spécifique au fournisseur
+                if supplier == "Yes Food":
+                    final_file_path = process_yes_food(temp_excel_path)
+                elif supplier == "MTC":
+                    final_file_path = process_mtc(temp_excel_path)
+                
+                # Télécharger le fichier Excel final
+                with open(final_file_path, "rb") as f:
                     st.download_button(
                         label="Télécharger le fichier Excel",
                         data=f,
-                        file_name=os.path.basename(temp_excel_path),
+                        file_name=os.path.basename(final_file_path),
                         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                     )
                 
@@ -46,6 +54,8 @@ def main():
             os.remove(temp_pdf_path)
             if os.path.exists(temp_excel_path):
                 os.remove(temp_excel_path)
+            if os.path.exists(final_file_path):
+                os.remove(final_file_path)
         else:
             st.warning("Veuillez choisir un fournisseur et uploader un fichier PDF.")
 
