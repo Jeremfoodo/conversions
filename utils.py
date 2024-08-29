@@ -1,9 +1,8 @@
 import pdftables_api
 import tempfile
-import os
 
 def convert_pdf_to_excel(pdf_path):
-    # Créez un fichier temporaire pour stocker le fichier Excel converti
+    # Crée un fichier temporaire pour stocker le fichier Excel converti
     with tempfile.NamedTemporaryFile(delete=False, suffix='.xlsx') as temp_file:
         temp_excel_path = temp_file.name
     
@@ -19,4 +18,5 @@ def convert_pdf_to_excel(pdf_path):
         return None
 
     return temp_excel_path
+
 
