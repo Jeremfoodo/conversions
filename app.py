@@ -2,6 +2,7 @@ import streamlit as st
 from utils import convert_pdf_to_excel
 from converters.yes_food_converter import process_yes_food
 from converters.mtc_converter import process_mtc
+import tempfile
 
 # Fonction principale de l'application
 def main():
@@ -19,29 +20,27 @@ def main():
     # Bouton de conversion
     if st.button("Convertir"):
         if uploaded_file and supplier != "Select":
-            st.write(f"Vous allez convertir la mercuriale pour le fournisseur **{supplier}**. Attention, cela coûte de l'argent à chaque fois. Êtes-vous certain de ce fichier ?")
-
-            # Ajouter les boutons pour la confirmation
-            col1, col2 = st.columns(2)
-            with col1:
-                if st.button("Annuler"):
-                    st.write("Conversion annulée.")
-            with col2:
-                if st.button("OUI"):
-                    run_conversion(uploaded_file, supplier)
+            # Afficher un message de confirmation
+            confirm = st.selectbox(
+                "Vous allez convertir la mercuriale pour le fournisseur. Attention, cela coûte de l'argent à chaque fois. Êtes-vous certain de ce fichier ?",
+                ["Annuler", "OUI"]
+            )
+            
+            if confirm == "OUI":
+                run_conversion(uploaded_file, supplier)
         else:
             st.warning("Veuillez choisir un fournisseur et uploader un fichier PDF.")
 
 def run_conversion(file, supplier):
     st.spinner("Conversion en cours...")
-    
-    # Sauvegarder le fichier PDF temporairement
-    pdf_path = '/tmp/uploaded_file.pdf'
-    with open(pdf_path, 'wb') as f:
-        f.write(file.getvalue())
+
+    # Créer un fichier temporaire pour le PDF
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_pdf:
+        temp_pdf.write(file.getvalue())
+        temp_pdf_path = temp_pdf.name
 
     # Convertir le fichier PDF en Excel
-    temp_excel_path = convert_pdf_to_excel(pdf_path)  
+    temp_excel_path = convert_pdf_to_excel(temp_pdf_path)
 
     if temp_excel_path:
         # Appel à la fonction de conversion spécifique au fournisseur
@@ -55,7 +54,12 @@ def run_conversion(file, supplier):
 
         # Afficher le bouton de téléchargement
         with open(temp_excel_path, 'rb') as f:
-            st.download_button("Télécharger le fichier Excel", f, file_name=output_file_name)
+            st.download_button(
+                "Télécharger le fichier Excel", 
+                f, 
+                file_name=output_file_name, 
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            )
         
         st.success("Conversion terminée ! Vous pouvez télécharger le fichier Excel.")
     else:
