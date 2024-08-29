@@ -1,19 +1,19 @@
 import requests
 
-def convert_pdf_to_excel(pdf_file_path, api_key):
+def convert_pdf_to_excel(pdf_file_path):
     """
     Convertit un fichier PDF en un fichier Excel avec un seul onglet en utilisant l'API PDFTables via requests.
     
     :param pdf_file_path: Chemin vers le fichier PDF à convertir.
     :param api_key: Clé API pour PDFTables.
-    :return: Chemin vers le fichier Excel converti.
+    :return: Chemin vers le fichier Excel converti ou None en cas d'erreur.
     """
-    temp_excel_path = f'/tmp/converted.xlsx'
+    temp_excel_path = '/tmp/converted.xlsx'  # Chemin temporaire pour le fichier Excel
     
     # URL de l'API PDFTables avec le format xlsx-single
-    url = f"https://pdftables.com/api?key={api_key}&format=xlsx-single"
+    url = f"https://pdftables.com/api?key=o6xspb5x8fq4&format=xlsx-single"
     
-    # Chargement du fichier PDF
+    # Charger le fichier PDF
     with open(pdf_file_path, 'rb') as file:
         files = {'f': file}
         
