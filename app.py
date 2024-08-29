@@ -20,12 +20,16 @@ def main():
     # Bouton de conversion
     if st.button("Convertir"):
         if uploaded_file and supplier != "Select":
-            if st.confirm(
-                f"Vous allez convertir la mercuriale pour le fournisseur {supplier}. Attention, cela coûte de l'argent à chaque fois. Êtes-vous certain de ce fichier ?",
-                options=["Annuler", "OUI"],
-                on_confirm=lambda: run_conversion(uploaded_file, supplier)
-            ) == "OUI":
-                run_conversion(uploaded_file, supplier)
+            st.write(f"Vous allez convertir la mercuriale pour le fournisseur **{supplier}**. Attention, cela coûte de l'argent à chaque fois. Êtes-vous certain de ce fichier ?")
+
+            # Ajouter les boutons pour la confirmation
+            col1, col2 = st.columns(2)
+            with col1:
+                if st.button("Annuler"):
+                    st.write("Conversion annulée.")
+            with col2:
+                if st.button("OUI"):
+                    run_conversion(uploaded_file, supplier)
         else:
             st.warning("Veuillez choisir un fournisseur et uploader un fichier PDF.")
 
@@ -38,7 +42,8 @@ def run_conversion(file, supplier):
         f.write(file.getvalue())
 
     # Convertir le fichier PDF en Excel
-    temp_excel_path = convert_pdf_to_excel(pdf_path) 
+    temp_excel_path = convert_pdf_to_excel(pdf_path)  
+    
     if temp_excel_path:
         # Appel à la fonction de conversion spécifique au fournisseur
         if supplier == "Yes Food":
