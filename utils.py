@@ -14,7 +14,7 @@ def convert_pdf_to_excel(pdf_path):
     
     try:
         # Convertir le PDF en Excel avec un seul onglet
-        client.xlsx(pdf_path, temp_excel_path)
+        client.xlsx_single(pdf_path, temp_excel_path)
         print(f"Conversion réussie, fichier sauvegardé sous : {temp_excel_path}")
     except Exception as e:
         print(f"Erreur lors de la conversion : {e}")
