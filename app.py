@@ -5,6 +5,7 @@ from utils import convert_pdf_to_excel
 from converters.yes_food_converter import process_yes_food
 from converters.mtc_converter import process_mtc
 
+# Fonction principale de l'application
 def main():
     st.title("Conversion des Mercuriales")
 
@@ -20,40 +21,42 @@ def main():
     # Bouton de conversion
     if st.button("Convertir"):
         if uploaded_file and supplier != "Select":
-            st.write(f"Vous allez convertir la mercuriale pour le fournisseur {supplier}. Attention, cela coûte de l'argent à chaque fois. Êtes-vous certain de ce fichier ?")
-            
-            # Bouton de confirmation
-            if st.button("Confirmer"):
+            if st.button("Confirmer la conversion"):
                 st.spinner("Conversion en cours...")
                 
-                # Convertir le fichier PDF
+                # Sauvegarde temporaire du fichier PDF
                 with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as temp_pdf:
-                    temp_pdf.write(uploaded_file.read())
                     temp_pdf_path = temp_pdf.name
+                    temp_pdf.write(uploaded_file.read())
+                    temp_pdf.close()
                 
-                # Appel à la fonction de conversion et obtenir le fichier Excel
-                file_path = convert_pdf_to_excel(temp_pdf_path)
+                # Conversion du PDF en Excel
+                temp_excel_path = convert_pdf_to_excel(temp_pdf_path)  # Remplacez par votre clé API
                 
-                if file_path:
-                    # Appel à la fonction de traitement spécifique au fournisseur
+                if temp_excel_path:
+                    # Traitement spécifique selon le fournisseur
                     if supplier == "Yes Food":
-                        process_yes_food(file_path)
+                        process_yes_food(temp_excel_path)
                     elif supplier == "MTC":
-                        process_mtc(file_path)
-
-                    st.success("Conversion terminée ! Vous pouvez télécharger le fichier Excel.")
-                    with open(file_path, 'rb') as file:
+                        process_mtc(temp_excel_path)
+                    
+                    # Téléchargement du fichier Excel
+                    with open(temp_excel_path, "rb") as f:
                         st.download_button(
-                            "Télécharger le fichier Excel", 
-                            file, 
-                            file_name=f"Produits_Prix_{supplier}.xlsx", 
+                            label="Télécharger le fichier Excel",
+                            data=f,
+                            file_name=os.path.basename(temp_excel_path),
                             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                         )
+                    
+                    st.success("Conversion terminée ! Vous pouvez télécharger le fichier Excel.")
                 else:
-                    st.error("Erreur lors de la conversion du fichier.")
+                    st.error("Erreur lors de la conversion du fichier PDF.")
                 
-            if st.button("Annuler"):
-                st.write("La conversion a été annulée.")
+                # Nettoyer les fichiers temporaires
+                os.remove(temp_pdf_path)
+                if os.path.exists(temp_excel_path):
+                    os.remove(temp_excel_path)
         else:
             st.warning("Veuillez choisir un fournisseur et uploader un fichier PDF.")
 
