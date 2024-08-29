@@ -1,5 +1,4 @@
 import streamlit as st
-import os
 from utils import convert_pdf_to_excel
 from converters.yes_food_converter import process_yes_food
 from converters.mtc_converter import process_mtc
@@ -35,7 +34,7 @@ def main():
 
 def run_conversion(file, supplier):
     st.spinner("Conversion en cours...")
-
+    
     # Sauvegarder le fichier PDF temporairement
     pdf_path = '/tmp/uploaded_file.pdf'
     with open(pdf_path, 'wb') as f:
@@ -43,7 +42,7 @@ def run_conversion(file, supplier):
 
     # Convertir le fichier PDF en Excel
     temp_excel_path = convert_pdf_to_excel(pdf_path)  
-    
+
     if temp_excel_path:
         # Appel à la fonction de conversion spécifique au fournisseur
         if supplier == "Yes Food":
@@ -51,9 +50,12 @@ def run_conversion(file, supplier):
         elif supplier == "MTC":
             process_mtc(temp_excel_path)  # Traitement spécifique pour MTC
         
+        # Définir le nom du fichier de sortie
+        output_file_name = f"Produits_Prix_{supplier.replace(' ', '_')}.xlsx"
+
         # Afficher le bouton de téléchargement
         with open(temp_excel_path, 'rb') as f:
-            st.download_button("Télécharger le fichier Excel", f, file_name="Produits_Prix_MTC.xlsx")
+            st.download_button("Télécharger le fichier Excel", f, file_name=output_file_name)
         
         st.success("Conversion terminée ! Vous pouvez télécharger le fichier Excel.")
     else:
