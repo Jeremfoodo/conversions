@@ -2,8 +2,6 @@ import streamlit as st
 import tempfile
 import os
 from utils import convert_pdf_to_excel
-from converters.yes_food_converter import process_yes_food
-from converters.mtc_converter import process_mtc
 
 # Fonction principale de l'application
 def main():
@@ -21,42 +19,33 @@ def main():
     # Bouton de conversion
     if st.button("Convertir"):
         if uploaded_file and supplier != "Select":
-            if st.button("Confirmer la conversion"):
-                st.spinner("Conversion en cours...")
+            # Sauvegarde temporaire du fichier PDF
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as temp_pdf:
+                temp_pdf_path = temp_pdf.name
+                temp_pdf.write(uploaded_file.read())
+                temp_pdf.close()
+            
+            # Conversion du PDF en Excel
+            temp_excel_path = convert_pdf_to_excel(temp_pdf_path)  # Remplacez par votre clé API
+            
+            if temp_excel_path:
+                # Téléchargement du fichier Excel
+                with open(temp_excel_path, "rb") as f:
+                    st.download_button(
+                        label="Télécharger le fichier Excel",
+                        data=f,
+                        file_name=os.path.basename(temp_excel_path),
+                        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                    )
                 
-                # Sauvegarde temporaire du fichier PDF
-                with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as temp_pdf:
-                    temp_pdf_path = temp_pdf.name
-                    temp_pdf.write(uploaded_file.read())
-                    temp_pdf.close()
-                
-                # Conversion du PDF en Excel
-                temp_excel_path = convert_pdf_to_excel(temp_pdf_path)  # Remplacez par votre clé API
-                
-                if temp_excel_path:
-                    # Traitement spécifique selon le fournisseur
-                    if supplier == "Yes Food":
-                        process_yes_food(temp_excel_path)
-                    elif supplier == "MTC":
-                        process_mtc(temp_excel_path)
-                    
-                    # Téléchargement du fichier Excel
-                    with open(temp_excel_path, "rb") as f:
-                        st.download_button(
-                            label="Télécharger le fichier Excel",
-                            data=f,
-                            file_name=os.path.basename(temp_excel_path),
-                            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                        )
-                    
-                    st.success("Conversion terminée ! Vous pouvez télécharger le fichier Excel.")
-                else:
-                    st.error("Erreur lors de la conversion du fichier PDF.")
-                
-                # Nettoyer les fichiers temporaires
-                os.remove(temp_pdf_path)
-                if os.path.exists(temp_excel_path):
-                    os.remove(temp_excel_path)
+                st.success("Conversion terminée ! Vous pouvez télécharger le fichier Excel.")
+            else:
+                st.error("Erreur lors de la conversion du fichier PDF.")
+            
+            # Nettoyer les fichiers temporaires
+            os.remove(temp_pdf_path)
+            if os.path.exists(temp_excel_path):
+                os.remove(temp_excel_path)
         else:
             st.warning("Veuillez choisir un fournisseur et uploader un fichier PDF.")
 
