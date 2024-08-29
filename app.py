@@ -38,7 +38,7 @@ def main():
                 elif supplier == "MTC":
                     final_file_path = process_mtc(temp_excel_path)
                 elif supplier == "Easy Meat":
-                    final_file_path = process_easy_meat(temp_excel_path)
+                    final_file_path = process_easymeat(temp_excel_path)
                 
                 # Télécharger le fichier Excel final
                 with open(final_file_path, "rb") as f:
