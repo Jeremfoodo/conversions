@@ -19,8 +19,10 @@ def main():
     # Bouton de conversion
     if st.button("Convertir"):
         if uploaded_file and supplier != "Select":
-            # Confirmation avant conversion
-            if st.confirm("Vous allez convertir la mercuriale pour le fournisseur {}. Attention, cela coûte de l'argent à chaque fois. Êtes-vous certain de ce fichier ?".format(supplier), options=["Annuler", "OUI"], on_confirm=lambda: run_conversion(uploaded_file, supplier)):
+            st.write(f"Vous allez convertir la mercuriale pour le fournisseur {supplier}. Attention, cela coûte de l'argent à chaque fois. Êtes-vous certain de ce fichier ?")
+            
+            # Bouton de confirmation
+            if st.button("Confirmer"):
                 st.spinner("Conversion en cours...")
                 file_path = convert_pdf_to_excel(uploaded_file, supplier)
                 
@@ -32,7 +34,9 @@ def main():
 
                 st.success("Conversion terminée ! Vous pouvez télécharger le fichier Excel.")
                 with open(file_path, 'rb') as file:
-                    st.download_button("Télécharger le fichier Excel", file, file_name="Produits_Prix_{}.xlsx".format(supplier), mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+                    st.download_button("Télécharger le fichier Excel", file, file_name=f"Produits_Prix_{supplier}.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+            if st.button("Annuler"):
+                st.write("La conversion a été annulée.")
         else:
             st.warning("Veuillez choisir un fournisseur et uploader un fichier PDF.")
 
