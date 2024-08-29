@@ -1,4 +1,5 @@
 import streamlit as st
+import os
 from utils import convert_pdf_to_excel
 from converters.yes_food_converter import process_yes_food
 from converters.mtc_converter import process_mtc
@@ -19,27 +20,39 @@ def main():
     # Bouton de conversion
     if st.button("Convertir"):
         if uploaded_file and supplier != "Select":
-            st.confirm(
+            if st.confirm(
                 f"Vous allez convertir la mercuriale pour le fournisseur {supplier}. Attention, cela coûte de l'argent à chaque fois. Êtes-vous certain de ce fichier ?",
                 options=["Annuler", "OUI"],
                 on_confirm=lambda: run_conversion(uploaded_file, supplier)
-            )
+            ) == "OUI":
+                run_conversion(uploaded_file, supplier)
         else:
             st.warning("Veuillez choisir un fournisseur et uploader un fichier PDF.")
 
 def run_conversion(file, supplier):
     st.spinner("Conversion en cours...")
-    
-    # Appel à la fonction de conversion spécifique au fournisseur
-    if supplier == "Yes Food":
-        convert_pdf_to_excel(file, "yes_food")  # Convertir le PDF
-        process_yes_food(file)  # Traitement spécifique pour Yes Food
-    elif supplier == "MTC":
-        convert_pdf_to_excel(file, "mtc")  # Convertir le PDF
-        process_mtc(file)  # Traitement spécifique pour MTC
 
-    st.success("Conversion terminée ! Vous pouvez télécharger le fichier Excel.")
-    st.download_button("Télécharger le fichier Excel", file)
+    # Sauvegarder le fichier PDF temporairement
+    pdf_path = '/tmp/uploaded_file.pdf'
+    with open(pdf_path, 'wb') as f:
+        f.write(file.getvalue())
+
+    # Convertir le fichier PDF en Excel
+    temp_excel_path = convert_pdf_to_excel(pdf_path) 
+    if temp_excel_path:
+        # Appel à la fonction de conversion spécifique au fournisseur
+        if supplier == "Yes Food":
+            process_yes_food(temp_excel_path)  # Traitement spécifique pour Yes Food
+        elif supplier == "MTC":
+            process_mtc(temp_excel_path)  # Traitement spécifique pour MTC
+        
+        # Afficher le bouton de téléchargement
+        with open(temp_excel_path, 'rb') as f:
+            st.download_button("Télécharger le fichier Excel", f, file_name="Produits_Prix_MTC.xlsx")
+        
+        st.success("Conversion terminée ! Vous pouvez télécharger le fichier Excel.")
+    else:
+        st.error("Erreur lors de la conversion. Veuillez réessayer.")
 
 if __name__ == "__main__":
     main()
