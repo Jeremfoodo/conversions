@@ -26,7 +26,7 @@ def main():
                 temp_pdf.close()
             
             # Conversion du PDF en Excel
-            temp_excel_path = convert_pdf_to_excel(temp_pdf_path)  # Remplacez par votre clé API
+            temp_excel_path = convert_pdf_to_excel(temp_pdf_path)
             
             if temp_excel_path:
                 # Téléchargement du fichier Excel
