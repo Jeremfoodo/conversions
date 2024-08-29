@@ -4,13 +4,14 @@ import os
 from utils import convert_pdf_to_excel
 from converters.yes_food_converter import process_yes_food
 from converters.mtc_converter import process_mtc
+from converters.easy_meat_converter import process_easymeat
 
 # Fonction principale de l'application
 def main():
     st.title("Conversion des Mercuriales")
 
     # Menu déroulant pour choisir le fournisseur
-    supplier = st.selectbox("Choisissez le fournisseur", ["Select", "Yes Food", "MTC"])
+    supplier = st.selectbox("Choisissez le fournisseur", ["Select", "Yes Food", "MTC", "Easy Meat"])
 
     # Upload du fichier PDF
     uploaded_file = st.file_uploader(
@@ -36,6 +37,8 @@ def main():
                     final_file_path = process_yes_food(temp_excel_path)
                 elif supplier == "MTC":
                     final_file_path = process_mtc(temp_excel_path)
+                elif supplier == "Easy Meat":
+                    final_file_path = process_easy_meat(temp_excel_path)
                 
                 # Télécharger le fichier Excel final
                 with open(final_file_path, "rb") as f:
