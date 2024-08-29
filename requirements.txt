@@ -2,3 +2,4 @@ streamlit
 pandas
 pdftables-api
 openpyxl
+request
