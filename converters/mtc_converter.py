@@ -48,8 +48,8 @@ def process_mtc(file_path):
     for index, row in df.iterrows():
         if 84 <= index <= 91:  # Ajuster les indices pour les lignes de produits VIANDE PIECEE (commence à la ligne 86)
             product_name = row[0]  # Le nom du produit est en colonne 8
-            blanc_price = row[2]  # Prix pour la variante Irlande en colonne 9
-            rose_price = row[3]  # Prix pour la variante Galice en colonne 10
+            irlande_price = row[2]  # Prix pour la variante Irlande en colonne 9
+            galice_price = row[3]  # Prix pour la variante Galice en colonne 10
         
             # Ajouter les prix pour Irlande
             data["Produit"].append(product_name)
